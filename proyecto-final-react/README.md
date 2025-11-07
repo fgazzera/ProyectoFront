@@ -39,14 +39,6 @@ proyecto-final-react/
   - `GET /api/health`
 - CORS configurado para `http://localhost:5173`.
 
-> **Migración de base ya creada:** si ya tenías la tabla `users`, agregá las nuevas columnas o recrea la tabla. Ejemplo rápido:
-> ```sql
-> ALTER TABLE users ADD COLUMN gender VARCHAR(20) NOT NULL DEFAULT 'femenino';
-> ALTER TABLE users ADD COLUMN gender_other VARCHAR(120);
-> ALTER TABLE users ADD COLUMN birthdate DATE NOT NULL DEFAULT '2000-01-01';
-> ```
-> Luego ajusta los valores reales y quita los defaults si no los necesitás.
-
 ### Frontend (carpeta `src/`)
 - `Users.jsx`: muestra usuarios internos, administradores externos y un formulario plegable con select de género, campo condicional “Describe el género” y fecha de nacimiento.
 - `UserDetail.jsx`: edición con las mismas reglas, eliminación y redirección automática a `/usuarios` al guardar.
@@ -58,7 +50,6 @@ proyecto-final-react/
 ### 1. Variables de entorno
 ```bash
 cp .env.example .env
-# (Opcional) backend/.env para correr FastAPI sin Docker
 ```
 
 ### 2. Backend + base de datos
@@ -79,11 +70,6 @@ Abrí [http://localhost:5173](http://localhost:5173). El frontend usa `VITE_API_
 - `npm run dev` · entorno de desarrollo React.
 - `npm run build` · build de producción del frontend.
 - `docker compose up --build` · levanta API + Postgres con las últimas dependencias.
-
-## Próximos pasos sugeridos
-1. Agregar tests (unitarios y/o e2e) para validar las reglas nuevas.
-2. Construir imágenes separadas y servir el frontend estático desde Nginx en el mismo Compose.
-3. Implementar autenticación real (tokens) y proteger los endpoints del backend.
 
 ---
 **Autores:** Facundo Gazzera y Tomás Garbellotto · Taller Web 2025.

@@ -8,6 +8,22 @@ from ..database import get_db
 router = APIRouter(prefix='/api/users', tags=['users'])
 
 
+def _prepare_payload(data: dict, current_gender: str | None = None) -> dict:
+  website = data.get('website')
+  if website is not None:
+    trimmed = website.strip()
+    data['website'] = trimmed or None
+
+  gender = data.get('gender', current_gender)
+  if gender and gender != schemas.Gender.otro:
+    data['gender_other'] = None
+  elif gender == schemas.Gender.otro and 'gender_other' in data:
+    other = data['gender_other']
+    data['gender_other'] = other.strip() if isinstance(other, str) else other
+
+  return data
+
+
 @router.get('/', response_model=list[schemas.UserRead])
 def list_users(db: Session = Depends(get_db)):
   return db.query(models.User).order_by(models.User.id.asc()).all()
@@ -23,7 +39,8 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
 
 @router.post('/', response_model=schemas.UserRead, status_code=status.HTTP_201_CREATED)
 def create_user(payload: schemas.UserCreate, db: Session = Depends(get_db)):
-  new_user = models.User(**payload.model_dump())
+  data = _prepare_payload(payload.model_dump())
+  new_user = models.User(**data)
   db.add(new_user)
   try:
     db.commit()
@@ -40,7 +57,7 @@ def update_user(user_id: int, payload: schemas.UserUpdate, db: Session = Depends
   if not user:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Usuario no encontrado')
 
-  data = payload.model_dump(exclude_unset=True)
+  data = _prepare_payload(payload.model_dump(exclude_unset=True), current_gender=user.gender)
   for field, value in data.items():
     setattr(user, field, value)
 

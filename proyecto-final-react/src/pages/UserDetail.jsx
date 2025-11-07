@@ -7,12 +7,42 @@ import {
   Card,
   CardContent,
   CircularProgress,
+  MenuItem,
   Snackbar,
   TextField,
   Typography,
 } from '@mui/material'
 import { useForm } from 'react-hook-form'
 import api from '../services/api.js'
+import {
+  EMAIL_PATTERN,
+  EMAIL_PATTERN_MESSAGE,
+  GENDER_OPTIONS,
+  PHONE_PATTERN,
+  PHONE_PATTERN_MESSAGE,
+} from '../constants/userFields.js'
+
+const DEFAULT_VALUES = {
+  name: '',
+  email: '',
+  phone: '',
+  website: '',
+  gender: 'femenino',
+  gender_other: '',
+  birthdate: '',
+}
+
+const buildPayload = (values) => {
+  const website = values.website?.trim()
+  return {
+    ...values,
+    name: values.name.trim(),
+    email: values.email.trim().toLowerCase(),
+    phone: values.phone.trim(),
+    website: website || undefined,
+    gender_other: values.gender === 'otro' ? values.gender_other : undefined,
+  }
+}
 
 export default function UserDetail() {
   const { id } = useParams()
@@ -24,8 +54,18 @@ export default function UserDetail() {
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors, isSubmitting },
-  } = useForm()
+  } = useForm({ defaultValues: DEFAULT_VALUES })
+
+  const genderValue = watch('gender')
+
+  useEffect(() => {
+    if (genderValue !== 'otro') {
+      setValue('gender_other', '')
+    }
+  }, [genderValue, setValue])
 
   useEffect(() => {
     const loadUser = async () => {
@@ -37,7 +77,10 @@ export default function UserDetail() {
           name: data.name,
           email: data.email,
           phone: data.phone,
-          website: data.website,
+          website: data.website ?? '',
+          gender: data.gender,
+          gender_other: data.gender === 'otro' ? data.gender_other ?? '' : '',
+          birthdate: data.birthdate ? data.birthdate.slice(0, 10) : '',
         })
       } catch (err) {
         console.error(err)
@@ -50,16 +93,11 @@ export default function UserDetail() {
     loadUser()
   }, [id, reset])
 
-  const onUpdate = async (payload) => {
+  const onUpdate = async (formValues) => {
     try {
-      const { data } = await api.put(`/users/${id}`, payload)
-      reset({
-        name: data.name,
-        email: data.email,
-        phone: data.phone,
-        website: data.website,
-      })
-      setToast('Usuario actualizado')
+      const payload = buildPayload(formValues)
+      await api.put(`/users/${id}`, payload)
+      navigate('/usuarios', { state: { toast: 'Usuario actualizado' } })
     } catch (err) {
       console.error(err)
       setToast('No se pudo actualizar el usuario')
@@ -104,17 +142,49 @@ export default function UserDetail() {
                 label="Email"
                 type="email"
                 InputLabelProps={{ shrink: true }}
-                {...register('email', { required: 'Requerido' })}
+                {...register('email', { required: 'Requerido', pattern: { value: EMAIL_PATTERN, message: EMAIL_PATTERN_MESSAGE } })}
                 error={!!errors.email}
                 helperText={errors.email?.message}
               />
               <TextField
                 label="Teléfono"
                 type="tel"
+                inputProps={{ maxLength: 10 }}
                 InputLabelProps={{ shrink: true }}
-                {...register('phone', { required: 'Requerido' })}
+                {...register('phone', { required: 'Requerido', pattern: { value: PHONE_PATTERN, message: PHONE_PATTERN_MESSAGE } })}
                 error={!!errors.phone}
                 helperText={errors.phone?.message}
+              />
+              <TextField
+                label="Género"
+                select
+                InputLabelProps={{ shrink: true }}
+                {...register('gender', { required: 'Requerido' })}
+                error={!!errors.gender}
+                helperText={errors.gender?.message}
+              >
+                {GENDER_OPTIONS.map((option) => (
+                  <MenuItem key={option.value} value={option.value}>
+                    {option.label}
+                  </MenuItem>
+                ))}
+              </TextField>
+              {genderValue === 'otro' && (
+                <TextField
+                  label="Describe el género"
+                  InputLabelProps={{ shrink: true }}
+                  {...register('gender_other', { required: 'Describe el género seleccionado' })}
+                  error={!!errors.gender_other}
+                  helperText={errors.gender_other?.message}
+                />
+              )}
+              <TextField
+                label="Fecha de nacimiento"
+                type="date"
+                InputLabelProps={{ shrink: true }}
+                {...register('birthdate', { required: 'Requerido' })}
+                error={!!errors.birthdate}
+                helperText={errors.birthdate?.message}
               />
               <TextField label="Website" InputLabelProps={{ shrink: true }} {...register('website')} />
               <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>

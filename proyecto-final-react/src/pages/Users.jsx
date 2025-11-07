@@ -1,4 +1,4 @@
-﻿import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import {
   Alert,
   Box,
@@ -9,15 +9,47 @@ import {
   Collapse,
   Grid,
   IconButton,
+  MenuItem,
   Snackbar,
   TextField,
   Typography,
 } from '@mui/material'
-import { useForm } from 'react-hook-form'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import { useForm } from 'react-hook-form'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import api, { adminApi } from '../services/api.js'
+import {
+  EMAIL_PATTERN,
+  EMAIL_PATTERN_MESSAGE,
+  GENDER_OPTIONS,
+  PHONE_PATTERN,
+  PHONE_PATTERN_MESSAGE,
+  formatBirthdate,
+  formatGenderLabel,
+} from '../constants/userFields.js'
+
+const DEFAULT_FORM_VALUES = {
+  name: '',
+  email: '',
+  phone: '',
+  website: '',
+  gender: 'femenino',
+  gender_other: '',
+  birthdate: '',
+}
+
+const buildPayload = (values) => {
+  const website = values.website?.trim()
+  return {
+    ...values,
+    name: values.name.trim(),
+    email: values.email.trim().toLowerCase(),
+    phone: values.phone.trim(),
+    website: website || undefined,
+    gender_other: values.gender === 'otro' ? values.gender_other : undefined,
+  }
+}
 
 export default function Users() {
   const [users, setUsers] = useState([])
@@ -36,8 +68,18 @@ export default function Users() {
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors, isSubmitting },
-  } = useForm()
+  } = useForm({ defaultValues: DEFAULT_FORM_VALUES })
+
+  const genderValue = watch('gender')
+
+  useEffect(() => {
+    if (genderValue !== 'otro') {
+      setValue('gender_other', '')
+    }
+  }, [genderValue, setValue])
 
   const fetchUsers = useCallback(async () => {
     setLoading(true)
@@ -79,11 +121,12 @@ export default function Users() {
     }
   }, [location, navigate])
 
-  const onCreate = async (payload) => {
+  const onCreate = async (formValues) => {
     try {
+      const payload = buildPayload(formValues)
       const { data } = await api.post('/users', payload)
       setToast(`Usuario "${data.name}" creado`)
-      reset()
+      reset(DEFAULT_FORM_VALUES)
       setShowForm(false)
       await fetchUsers()
     } catch (err) {
@@ -137,16 +180,46 @@ export default function Users() {
               <TextField
                 label="Email"
                 type="email"
-                {...register('email', { required: 'Requerido' })}
+                {...register('email', { required: 'Requerido', pattern: { value: EMAIL_PATTERN, message: EMAIL_PATTERN_MESSAGE } })}
                 error={!!errors.email}
                 helperText={errors.email?.message}
               />
               <TextField
                 label="Teléfono"
                 type="tel"
-                {...register('phone', { required: 'Requerido' })}
+                inputProps={{ maxLength: 10 }}
+                {...register('phone', { required: 'Requerido', pattern: { value: PHONE_PATTERN, message: PHONE_PATTERN_MESSAGE } })}
                 error={!!errors.phone}
                 helperText={errors.phone?.message}
+              />
+              <TextField
+                label="Género"
+                select
+                {...register('gender', { required: 'Requerido' })}
+                error={!!errors.gender}
+                helperText={errors.gender?.message}
+              >
+                {GENDER_OPTIONS.map((option) => (
+                  <MenuItem key={option.value} value={option.value}>
+                    {option.label}
+                  </MenuItem>
+                ))}
+              </TextField>
+              {genderValue === 'otro' && (
+                <TextField
+                  label="Describe el género"
+                  {...register('gender_other', { required: 'Describe el género seleccionado' })}
+                  error={!!errors.gender_other}
+                  helperText={errors.gender_other?.message}
+                />
+              )}
+              <TextField
+                label="Fecha de nacimiento"
+                type="date"
+                InputLabelProps={{ shrink: true }}
+                {...register('birthdate', { required: 'Requerido' })}
+                error={!!errors.birthdate}
+                helperText={errors.birthdate?.message}
               />
               <TextField label="Website" {...register('website')} />
               <Button type="submit" variant="contained" disabled={isSubmitting}>
@@ -233,6 +306,8 @@ export default function Users() {
                       <Typography variant="h6">{u.name}</Typography>
                       <Typography variant="body2">{u.email}</Typography>
                       <Typography variant="body2">{u.phone}</Typography>
+                      <Typography variant="body2">Género: {formatGenderLabel(u.gender, u.gender_other)}</Typography>
+                      <Typography variant="body2">Nacimiento: {formatBirthdate(u.birthdate)}</Typography>
                       {u.website && (
                         <Typography variant="body2" sx={{ wordBreak: 'break-all' }}>
                           {u.website}

@@ -1,111 +1,73 @@
-# Proyecto Final - Taller Web (React)
+# Proyecto final · Taller Web
 
-## 📋 Descripción
-Aplicación web desarrollada en **React** como proyecto final de la materia **Taller Web**. 
-El sistema simula una **Gestión de Usuarios**, cumpliendo con todos los requisitos del trabajo final:
-- Rutas públicas y privadas.
-- Login completo con usuario y contraseña.
-- Mantenimiento del estado de sesión.
-- Llamadas HTTP (GET, POST, PUT) a un backend.
-- Múltiples componentes y servicios.
-- Formulario con validaciones.
-- Estilos con Material UI.
+Aplicación completa (frontend + backend) para la gestión de usuarios, desarrollada como trabajo final siguiendo las consignas del PDF **Prácticos Taller Web**. Incluye login, rutas públicas/privadas, formularios con validaciones, consumo de API propia y estilos con Material UI.
 
----
+## Requisitos cubiertos
+- Autenticación con mantenimiento del estado en `localStorage`.
+- Rutas públicas `/login` y privadas `/usuarios`, `/usuarios/:id` protegidas por contexto.
+- Uso extensivo de componentes, hooks, context, `react-hook-form`, Material UI y React Router.
+- Llamadas HTTP GET/POST/PUT/DELETE contra un backend real.
+- Backend en Python (FastAPI) con base PostgreSQL persistida en Docker Compose.
+- Interceptores de Axios para logging y manejo de errores.
 
-## 🚀 Tecnologías utilizadas
-- [React 18](https://react.dev/)
-- [Vite](https://vitejs.dev/)
-- [React Router DOM](https://reactrouter.com/)
-- [Axios](https://axios-http.com/)
-- [React Hook Form](https://react-hook-form.com/)
-- [Material UI](https://mui.com/)
-
----
-
-## 🧱 Estructura del proyecto
+## Arquitectura
 ```
 proyecto-final-react/
-├─ src/
-│  ├─ main.jsx
-│  ├─ App.jsx
-│  ├─ routes/
-│  │  ├─ Router.jsx
-│  │  └─ ProtectedRoute.jsx
-│  ├─ pages/
-│  │  ├─ Login.jsx
-│  │  ├─ Users.jsx
-│  │  └─ UserDetail.jsx
-│  ├─ components/
-│  │  └─ Navbar.jsx
-│  ├─ context/
-│  │  └─ AuthContext.jsx
-│  └─ services/
-│     └─ api.js
+├─ src/               # Frontend Vite + React + MUI
+├─ backend/           # FastAPI + SQLAlchemy + Postgres models
+├─ docker-compose.yml # Orquesta API + Base de datos
+└─ .env.example       # URL utilizada por el frontend
 ```
 
----
+### Backend (carpeta `backend/`)
+- FastAPI + SQLAlchemy + Pydantic.
+- Modelo `User` con columnas `id`, `name`, `email`, `phone`, `website`, `created_at`.
+- Endpoints REST:
+  - `GET /api/users` y `GET /api/users/{id}`
+  - `POST /api/users`
+  - `PUT /api/users/{id}`
+  - `DELETE /api/users/{id}`
+  - `GET /api/health`
+- CORS configurado para `http://localhost:5173`.
 
-## 🧩 Funcionalidades principales
-### 🔐 Autenticación
-- Login con validación de email y contraseña.
-- Persistencia del usuario en `localStorage`.
-- Cierre de sesión con limpieza de estado.
+### Frontend (carpeta `src/`)
+- `AuthContext` mantiene sesión y protege rutas (ver `routes/ProtectedRoute.jsx`).
+- Página principal `/usuarios` lista los usuarios, permite eliminar y abre el formulario de alta bajo demanda.
+- `/usuarios/:id` permite editar y eliminar un usuario existente.
+- Login con validaciones y feedback visual usando React Hook Form + MUI.
 
-### 🌐 Rutas
-- `/login` → ruta pública.
-- `/usuarios` → lista de usuarios (privada).
-- `/usuarios/:id` → detalle y edición de usuario (privada).
+## Puesta en marcha
 
-### 💾 API
-- Conexión con [JSONPlaceholder](https://jsonplaceholder.typicode.com/users).
-- Métodos utilizados:
-  - `GET /users` → obtener lista de usuarios.
-  - `POST /users` → crear un nuevo usuario (simulado).
-  - `PUT /users/:id` → editar usuario (simulado).
-
-### 🧠 Contexto global
-- `AuthContext` maneja el estado de sesión (login/logout) y lo comparte entre componentes.
-
-### 🎨 Estilo
-- Interfaz basada en **Material UI**, con diseño limpio, responsivo y moderno.
-
----
-
-## ⚙️ Instalación y ejecución
-### 1️⃣ Clonar el proyecto
+### 1. Variables de entorno
+Copiá el archivo de ejemplo y ajustá si es necesario.
 ```bash
-git clone https://github.com/usuario/proyecto-final-react.git
-cd proyecto-final-react
+cp .env.example .env
+# (Opcional) backend/.env para ejecuciones fuera de Docker
 ```
 
-### 2️⃣ Instalar dependencias
+### 2. Backend + base de datos
+```bash
+docker compose up --build
+```
+- Postgres queda disponible en `localhost:5432`.
+- FastAPI escucha en `http://localhost:8000` (health: `/api/health`).
+
+### 3. Frontend
 ```bash
 npm install
-```
-
-### 3️⃣ Ejecutar en entorno de desarrollo
-```bash
 npm run dev
 ```
-Abrir en el navegador: [http://localhost:5173](http://localhost:5173)
+Abrí `http://localhost:5173`. El frontend usa `VITE_API_URL` para hablar con el backend levantado en Docker.
+
+## Scripts útiles
+- `npm run dev` · entorno de desarrollo React.
+- `npm run build` · build de producción del frontend.
+- `docker compose up --build` · levanta API + Postgres con hot reload básico.
+
+## Próximos pasos sugeridos
+1. Agregar tests (unitarios o e2e) tanto en el backend como en el frontend.
+2. Construir imágenes separadas para desplegar frontend + backend en un mismo Compose.
+3. Implementar autenticación real en el backend y proteger los endpoints.
 
 ---
-
-## 🧪 Validaciones
-Todos los formularios (login, creación y edición de usuario) implementan validaciones con `react-hook-form`:
-- Campos requeridos.
-- Formato de email válido.
-- Contraseña mínima de 4 caracteres.
-
----
-
-## 🔧 Interceptores de Axios
-Cada request HTTP pasa por un **interceptor** que:
-- Registra en consola la solicitud (método y URL).
-- Maneja errores de respuesta.
-
----
-
-## 🧑‍💻 Autores
-**Facundo Gazzera y Tomas Garbellotto** – Proyecto final de Taller Web (React) – 2025.
+**Autores:** Facundo Gazzera y Tomás Garbellotto · Taller Web 2025.

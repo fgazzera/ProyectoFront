@@ -1,7 +1,7 @@
 import React from 'react'
 import { useForm } from 'react-hook-form'
 import { Box, Button, Card, CardContent, TextField, Typography } from '@mui/material'
-import { useAuth } from '../context/AuthContext.jsx'
+import { useAuth } from '../context/useAuth.js'
 import { useNavigate } from 'react-router-dom'
 
 export default function Login() {
@@ -46,7 +46,7 @@ export default function Login() {
               fullWidth
             />
             <Button type="submit" variant="contained" disabled={isSubmitting}>
-              {isSubmitting ? 'Ingresando…' : 'Ingresar'}
+              {isSubmitting ? 'Ingresando...' : 'Ingresar'}
             </Button>
           </Box>
         </CardContent>

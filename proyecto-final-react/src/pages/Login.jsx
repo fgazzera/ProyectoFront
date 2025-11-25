@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { Box, Button, Card, CardContent, TextField, Typography } from '@mui/material'
 import { useAuth } from '../context/useAuth.js'
 import { useNavigate } from 'react-router-dom'
+import { EMAIL_PATTERN, EMAIL_PATTERN_MESSAGE } from '../constants/userFields.js'
 
 export default function Login() {
   const {
@@ -29,7 +30,7 @@ export default function Login() {
             <TextField
               label="Email"
               type="email"
-              {...register('email', { required: 'El email es obligatorio' })}
+              {...register('email', { required: 'El email es obligatorio', pattern: { value: EMAIL_PATTERN, message: EMAIL_PATTERN_MESSAGE } })}
               error={!!errors.email}
               helperText={errors.email?.message}
               fullWidth

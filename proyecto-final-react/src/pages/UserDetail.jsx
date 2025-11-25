@@ -7,30 +7,12 @@ import {
   Card,
   CardContent,
   CircularProgress,
-  MenuItem,
   Snackbar,
-  TextField,
   Typography,
 } from '@mui/material'
 import { useForm } from 'react-hook-form'
 import api from '../services/api.js'
-import {
-  EMAIL_PATTERN,
-  EMAIL_PATTERN_MESSAGE,
-  GENDER_OPTIONS,
-  PHONE_PATTERN,
-  PHONE_PATTERN_MESSAGE,
-} from '../constants/userFields.js'
-
-const DEFAULT_VALUES = {
-  name: '',
-  email: '',
-  phone: '',
-  website: '',
-  gender: 'femenino',
-  gender_other: '',
-  birthdate: '',
-}
+import UserForm, { DEFAULT_USER_VALUES } from '../components/UserForm.jsx'
 
 const buildPayload = (values) => {
   const website = values.website?.trim()
@@ -57,15 +39,7 @@ export default function UserDetail() {
     watch,
     setValue,
     formState: { errors, isSubmitting },
-  } = useForm({ defaultValues: DEFAULT_VALUES })
-
-  const genderValue = watch('gender')
-
-  useEffect(() => {
-    if (genderValue !== 'otro') {
-      setValue('gender_other', '')
-    }
-  }, [genderValue, setValue])
+  } = useForm({ defaultValues: DEFAULT_USER_VALUES })
 
   useEffect(() => {
     const loadUser = async () => {
@@ -130,72 +104,20 @@ export default function UserDetail() {
           ) : error ? (
             <Alert severity="error">{error}</Alert>
           ) : (
-            <Box component="form" onSubmit={handleSubmit(onUpdate)} sx={{ display: 'grid', gap: 2 }}>
-              <TextField
-                label="Nombre"
-                InputLabelProps={{ shrink: true }}
-                {...register('name', { required: 'Requerido' })}
-                error={!!errors.name}
-                helperText={errors.name?.message}
-              />
-              <TextField
-                label="Email"
-                type="email"
-                InputLabelProps={{ shrink: true }}
-                {...register('email', { required: 'Requerido', pattern: { value: EMAIL_PATTERN, message: EMAIL_PATTERN_MESSAGE } })}
-                error={!!errors.email}
-                helperText={errors.email?.message}
-              />
-              <TextField
-                label="Teléfono"
-                type="tel"
-                inputProps={{ maxLength: 10 }}
-                InputLabelProps={{ shrink: true }}
-                {...register('phone', { required: 'Requerido', pattern: { value: PHONE_PATTERN, message: PHONE_PATTERN_MESSAGE } })}
-                error={!!errors.phone}
-                helperText={errors.phone?.message}
-              />
-              <TextField
-                label="Género"
-                select
-                InputLabelProps={{ shrink: true }}
-                {...register('gender', { required: 'Requerido' })}
-                error={!!errors.gender}
-                helperText={errors.gender?.message}
-              >
-                {GENDER_OPTIONS.map((option) => (
-                  <MenuItem key={option.value} value={option.value}>
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </TextField>
-              {genderValue === 'otro' && (
-                <TextField
-                  label="Describe el género"
-                  InputLabelProps={{ shrink: true }}
-                  {...register('gender_other', { required: 'Describe el género seleccionado' })}
-                  error={!!errors.gender_other}
-                  helperText={errors.gender_other?.message}
-                />
-              )}
-              <TextField
-                label="Fecha de nacimiento"
-                type="date"
-                InputLabelProps={{ shrink: true }}
-                {...register('birthdate', { required: 'Requerido' })}
-                error={!!errors.birthdate}
-                helperText={errors.birthdate?.message}
-              />
-              <TextField label="Website" InputLabelProps={{ shrink: true }} {...register('website')} />
-              <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                <Button type="submit" variant="contained" disabled={isSubmitting}>
-                  {isSubmitting ? 'Guardando...' : 'Guardar cambios'}
-                </Button>
-                <Button type="button" color="error" variant="outlined" onClick={onDelete} disabled={isSubmitting}>
-                  Eliminar
-                </Button>
-              </Box>
-            </Box>
+            <UserForm
+              onSubmit={onUpdate}
+              handleSubmit={handleSubmit}
+              register={register}
+              watch={watch}
+              setValue={setValue}
+              errors={errors}
+              isSubmitting={isSubmitting}
+              submitLabel="Guardar cambios"
+              submittingLabel="Guardando..."
+              onDelete={onDelete}
+              deleteLabel="Eliminar"
+              shrinkLabels
+            />
           )}
         </CardContent>
       </Card>
@@ -203,4 +125,3 @@ export default function UserDetail() {
     </Box>
   )
 }
-

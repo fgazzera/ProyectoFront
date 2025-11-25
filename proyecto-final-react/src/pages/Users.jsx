@@ -9,9 +9,7 @@ import {
   Collapse,
   Grid,
   IconButton,
-  MenuItem,
   Snackbar,
-  TextField,
   Typography,
 } from '@mui/material'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
@@ -20,24 +18,10 @@ import { useForm } from 'react-hook-form'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import api, { adminApi } from '../services/api.js'
 import {
-  EMAIL_PATTERN,
-  EMAIL_PATTERN_MESSAGE,
-  GENDER_OPTIONS,
-  PHONE_PATTERN,
-  PHONE_PATTERN_MESSAGE,
   formatBirthdate,
   formatGenderLabel,
 } from '../constants/userFields.js'
-
-const DEFAULT_FORM_VALUES = {
-  name: '',
-  email: '',
-  phone: '',
-  website: '',
-  gender: 'femenino',
-  gender_other: '',
-  birthdate: '',
-}
+import UserForm, { DEFAULT_USER_VALUES } from '../components/UserForm.jsx'
 
 const buildPayload = (values) => {
   const website = values.website?.trim()
@@ -71,15 +55,7 @@ export default function Users() {
     watch,
     setValue,
     formState: { errors, isSubmitting },
-  } = useForm({ defaultValues: DEFAULT_FORM_VALUES })
-
-  const genderValue = watch('gender')
-
-  useEffect(() => {
-    if (genderValue !== 'otro') {
-      setValue('gender_other', '')
-    }
-  }, [genderValue, setValue])
+  } = useForm({ defaultValues: DEFAULT_USER_VALUES })
 
   const fetchUsers = useCallback(async () => {
     setLoading(true)
@@ -126,7 +102,7 @@ export default function Users() {
       const payload = buildPayload(formValues)
       const { data } = await api.post('/users', payload)
       setToast(`Usuario "${data.name}" creado`)
-      reset(DEFAULT_FORM_VALUES)
+      reset(DEFAULT_USER_VALUES)
       setShowForm(false)
       await fetchUsers()
     } catch (err) {
@@ -170,62 +146,17 @@ export default function Users() {
             <Typography variant="h6" gutterBottom>
               Crear nuevo usuario
             </Typography>
-            <Box component="form" onSubmit={handleSubmit(onCreate)} sx={{ display: 'grid', gap: 2 }}>
-              <TextField
-                label="Nombre"
-                {...register('name', { required: 'Requerido' })}
-                error={!!errors.name}
-                helperText={errors.name?.message}
-              />
-              <TextField
-                label="Email"
-                type="email"
-                {...register('email', { required: 'Requerido', pattern: { value: EMAIL_PATTERN, message: EMAIL_PATTERN_MESSAGE } })}
-                error={!!errors.email}
-                helperText={errors.email?.message}
-              />
-              <TextField
-                label="Teléfono"
-                type="tel"
-                inputProps={{ maxLength: 10 }}
-                {...register('phone', { required: 'Requerido', pattern: { value: PHONE_PATTERN, message: PHONE_PATTERN_MESSAGE } })}
-                error={!!errors.phone}
-                helperText={errors.phone?.message}
-              />
-              <TextField
-                label="Género"
-                select
-                {...register('gender', { required: 'Requerido' })}
-                error={!!errors.gender}
-                helperText={errors.gender?.message}
-              >
-                {GENDER_OPTIONS.map((option) => (
-                  <MenuItem key={option.value} value={option.value}>
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </TextField>
-              {genderValue === 'otro' && (
-                <TextField
-                  label="Describe el género"
-                  {...register('gender_other', { required: 'Describe el género seleccionado' })}
-                  error={!!errors.gender_other}
-                  helperText={errors.gender_other?.message}
-                />
-              )}
-              <TextField
-                label="Fecha de nacimiento"
-                type="date"
-                InputLabelProps={{ shrink: true }}
-                {...register('birthdate', { required: 'Requerido' })}
-                error={!!errors.birthdate}
-                helperText={errors.birthdate?.message}
-              />
-              <TextField label="Website" {...register('website')} />
-              <Button type="submit" variant="contained" disabled={isSubmitting}>
-                {isSubmitting ? 'Creando...' : 'Crear'}
-              </Button>
-            </Box>
+            <UserForm
+              onSubmit={onCreate}
+              handleSubmit={handleSubmit}
+              register={register}
+              watch={watch}
+              setValue={setValue}
+              errors={errors}
+              isSubmitting={isSubmitting}
+              submitLabel="Crear"
+              submittingLabel="Creando..."
+            />
           </CardContent>
         </Card>
       )}

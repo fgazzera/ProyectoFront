@@ -23,7 +23,7 @@ export default function Login() {
     <Box sx={{ display: 'grid', placeItems: 'center', minHeight: '70vh', p: 2 }}>
       <Card sx={{ width: '100%', maxWidth: 420 }}>
         <CardContent>
-          <Typography variant="h5" gutterBottom>
+          <Typography variant="h5" gutterBottom sx={{textAlign: 'center' }}>
             Iniciar sesión
           </Typography>
           <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ display: 'grid', gap: 2 }}>
@@ -46,7 +46,7 @@ export default function Login() {
               helperText={errors.password?.message}
               fullWidth
             />
-            <Button type="submit" variant="contained" disabled={isSubmitting}>
+            <Button type="submit" color="secondary" variant="contained" disabled={isSubmitting}>
               {isSubmitting ? 'Ingresando...' : 'Ingresar'}
             </Button>
           </Box>

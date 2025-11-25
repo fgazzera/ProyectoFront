@@ -90,11 +90,11 @@ export default function UserDetail() {
   }
 
   return (
-    <Box sx={{ p: 2, display: 'grid', gap: 2 }}>
+    <Box sx={{ p: 2, display: 'grid', gap: 2, justifyItems: 'center' }}>
       <Button onClick={() => navigate(-1)}>Volver</Button>
-      <Card sx={{ maxWidth: 640 }}>
+      <Card sx={{ width: '40%', maxWidth: 600 }}>
         <CardContent>
-          <Typography variant="h5" gutterBottom>
+          <Typography variant="h5" gutterBottom sx={{textAlign: 'center' }}>
             Editar usuario #{id}
           </Typography>
           {loading ? (

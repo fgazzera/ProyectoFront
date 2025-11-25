@@ -4,7 +4,7 @@ import { AuthProvider } from './context/AuthContext.jsx'
 import AppRouter from './routes/Router.jsx'
 
 const theme = createTheme({
-  palette: { mode: 'light' },
+  palette: { mode: 'dark' },
   shape: { borderRadius: 16 },
 })
 

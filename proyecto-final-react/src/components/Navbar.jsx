@@ -15,7 +15,7 @@ export default function Navbar() {
   return (
     <AppBar position="sticky" color="primary">
       <Toolbar sx={{ display: 'flex', gap: 2 }}>
-        <Typography variant="h6" sx={{ flexGrow: 1 }}>
+        <Typography variant="h5" sx={{ flexGrow: 1 }}>
           Gestión de Usuarios
         </Typography>
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
@@ -24,7 +24,7 @@ export default function Navbar() {
               <Button color="inherit" component={Link} to="/usuarios">
                 Usuarios
               </Button>
-              <Typography variant="body2" sx={{ opacity: 0.8 }}>
+              <Typography variant="body2" sx={{ opacity: 0.7 }}>
                 {user.name}
               </Typography>
               <Button color="inherit" onClick={handleLogout}>

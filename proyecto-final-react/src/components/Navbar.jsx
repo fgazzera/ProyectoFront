@@ -28,14 +28,6 @@ export default function Navbar({ mode, onToggleMode }) {
           Gestión de Usuarios
         </Typography>
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-          <IconButton
-            color="inherit"
-            size="small"
-            aria-label="Cambiar tema"
-            onClick={handleToggleTheme}
-          >
-            {currentMode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
-          </IconButton>
           {user ? (
             <>
               <Button color="inherit" component={Link} to="/usuarios">
@@ -44,9 +36,18 @@ export default function Navbar({ mode, onToggleMode }) {
               <Typography variant="body2" sx={{ opacity: 0.7 }}>
                 {user.name}
               </Typography>
+              
               <Button color="inherit" onClick={handleLogout}>
                 Salir
               </Button>
+              <IconButton
+                color="inherit"
+                size="small"
+                aria-label="Cambiar tema"
+                onClick={handleToggleTheme}
+              >
+                {currentMode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
+              </IconButton>
             </>
           ) : (
             <Button color="inherit" component={Link} to="/login">

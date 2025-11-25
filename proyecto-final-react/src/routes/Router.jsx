@@ -6,10 +6,10 @@ import UserDetail from '../pages/UserDetail.jsx'
 import ProtectedRoute from './ProtectedRoute.jsx'
 import Navbar from '../components/Navbar.jsx'
 
-export default function AppRouter() {
+export default function AppRouter({ mode, onToggleMode }) {
   return (
     <BrowserRouter>
-      <Navbar />
+      <Navbar mode={mode} onToggleMode={onToggleMode} />
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route

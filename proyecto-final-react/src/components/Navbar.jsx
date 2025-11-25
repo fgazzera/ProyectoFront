@@ -1,15 +1,24 @@
 import React from 'react'
-import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material'
+import { AppBar, Toolbar, Typography, Button, Box, IconButton } from '@mui/material'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/useAuth.js'
+import DarkModeIcon from '@mui/icons-material/DarkMode'
+import LightModeIcon from '@mui/icons-material/LightMode'
 
-export default function Navbar() {
+export default function Navbar({ mode, onToggleMode }) {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const currentMode = mode === 'light' ? 'light' : 'dark'
 
   const handleLogout = () => {
     logout()
     navigate('/login')
+  }
+
+  const handleToggleTheme = () => {
+    if (onToggleMode) {
+      onToggleMode()
+    }
   }
 
   return (
@@ -19,6 +28,14 @@ export default function Navbar() {
           Gestión de Usuarios
         </Typography>
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+          <IconButton
+            color="inherit"
+            size="small"
+            aria-label="Cambiar tema"
+            onClick={handleToggleTheme}
+          >
+            {currentMode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
+          </IconButton>
           {user ? (
             <>
               <Button color="inherit" component={Link} to="/usuarios">
